@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Manager</title>
+  </head>
+  <body>
+    <div id="app">
+      <h1 class="main-heading">Account Manager</h1>
+      <button type="button">Add New</button>
+      <input
+        type="search"
+        name="search"
+        id="search"
+        placeholder="Search account: e.g. google, steam"
+        class="search"
+      />
+      <form class="form">
+        <input
+          type="text"
+          name="label"
+          id="label"
+          placeholder="Label"
+          class="Enter label"
+        />
+        <input
+          type="text"
+          name="email"
+          id="email"
+          placeholder="Email"
+          class="Enter email"
+        />
+        <input
+          type="text"
+          name="username"
+          id="username"
+          placeholder="Username"
+          class="Enter username"
+        />
+        <input
+          type="text"
+          name="password"
+          id="password"
+          placeholder="Password"
+          class="Enter password"
+        />
+        <button type="submit" class="save-button">Save</button>
+      </form>
+      <ul class="accounts"></ul>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
