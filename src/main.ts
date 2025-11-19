@@ -1,3 +1,13 @@
+/*
+  To Do:
+    - Add delete account.
+    - Add edit account.
+    - Add empty text placeholder.
+    - Add copy to clipboard.
+    - [Done] Add validation.
+    - Don't render empty elements.
+*/
+
 type Account = {
   label: string;
   email: string;
@@ -147,7 +157,9 @@ function renderAllAccounts(): void {
       accountsList.append(accountListItem);
     });
   } else {
-    console.log("Still empty here...");
+    const emptyAccountListItem = createListItem("empty-account-item");
+    emptyAccountListItem.textContent = "Still empty here...";
+    accountsList.append(emptyAccountListItem);
   }
 }
 
@@ -186,6 +198,8 @@ document.addEventListener("DOMContentLoaded", renderAllAccounts);
 searchInput.addEventListener("input", searchAccounts);
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+  if (accounts.length < 1) accountsList.innerHTML = "";
   addAccount(accounts);
   renderNewAccount();
+  form.reset();
 });
