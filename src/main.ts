@@ -5,8 +5,14 @@ type Account = {
   password: string;
 };
 type Accounts = Account[];
-type AccountListItemParagraphs = {
-  labelParagraph: HTMLParagraphElement;
+type AccountListItemChild = {
+  emailDiv: HTMLDivElement;
+  usernameDiv: HTMLDivElement;
+  passwordDiv: HTMLDivElement;
+  labelHeading: HTMLHeadingElement;
+  emailHeading: HTMLHeadingElement;
+  usernameHeading: HTMLHeadingElement;
+  passwordHeading: HTMLHeadingElement;
   emailParagraph: HTMLParagraphElement;
   usernameParagraph: HTMLParagraphElement;
   passwordParagraph: HTMLParagraphElement;
@@ -19,21 +25,23 @@ const labelInput = document.querySelector(".label") as HTMLInputElement;
 const emailInput = document.querySelector(".email") as HTMLInputElement;
 const usernameInput = document.querySelector(".username") as HTMLInputElement;
 const passwordInput = document.querySelector(".password") as HTMLInputElement;
-const accountsList = document.querySelector(".accounts") as HTMLUListElement;
+const accountsList = document.querySelector(
+  ".accounts-list"
+) as HTMLUListElement;
 
 function searchAccounts(): void {
   const searchQuery = searchInput.value.toLowerCase();
-  const accountListItems = accountsList.getElementsByTagName("li");
+  const accountListItemLabelHeadings = accountsList.getElementsByTagName("h2");
 
-  for (const accountListItem of accountListItems) {
-    const isResultsFound = accountListItem.textContent
+  for (const accountListItemLabelHeading of accountListItemLabelHeadings) {
+    const isResultsFound = accountListItemLabelHeading.textContent
       .toLowerCase()
       .includes(searchQuery);
 
-    if (isResultsFound) {
-      accountListItem.style.display = "block";
-    } else {
-      accountListItem.style.display = "none";
+    if (accountListItemLabelHeading.parentElement) {
+      accountListItemLabelHeading.parentElement.style.display = isResultsFound
+        ? ""
+        : "none";
     }
   }
 }
@@ -56,26 +64,50 @@ function createListItem(className: string): HTMLLIElement {
   return listItem;
 }
 
-function createAccountListItemParagraphs(
-  account: Account
-): AccountListItemParagraphs {
-  const labelParagraph = document.createElement("p");
+function createAccountListItemChild(account: Account): AccountListItemChild {
+  const emailDiv = document.createElement("div");
+  const usernameDiv = document.createElement("div");
+  const passwordDiv = document.createElement("div");
+
+  const labelHeading = document.createElement("h2");
+  const emailHeading = document.createElement("h3");
+  const usernameHeading = document.createElement("h3");
+  const passwordHeading = document.createElement("h3");
+
   const emailParagraph = document.createElement("p");
   const usernameParagraph = document.createElement("p");
   const passwordParagraph = document.createElement("p");
 
-  labelParagraph.classList.add("label");
+  emailDiv.classList.add("email-wrapper");
+  usernameDiv.classList.add("username-wrapper");
+  passwordDiv.classList.add("password-wrapper");
+
+  labelHeading.classList.add("label-heading");
+  emailHeading.classList.add("email-heading");
+  usernameHeading.classList.add("username-heading");
+  passwordHeading.classList.add("password-heading");
+
   emailParagraph.classList.add("email");
   usernameParagraph.classList.add("username");
   passwordParagraph.classList.add("password");
 
-  labelParagraph.textContent = account.label;
+  labelHeading.textContent = account.label;
+  emailHeading.textContent = "Email";
+  usernameHeading.textContent = "Username";
+  passwordHeading.textContent = "Password";
+
   emailParagraph.textContent = account.email;
   usernameParagraph.textContent = account.username;
   passwordParagraph.textContent = account.password;
 
   return {
-    labelParagraph,
+    emailDiv,
+    usernameDiv,
+    passwordDiv,
+    labelHeading,
+    emailHeading,
+    usernameHeading,
+    passwordHeading,
     emailParagraph,
     usernameParagraph,
     passwordParagraph,
@@ -87,15 +119,29 @@ function renderAllAccounts(): void {
 
   if (accounts.length > 0) {
     accounts.forEach((account) => {
-      const accountListItem = createListItem("account");
-      const accountListItemParagraphs =
-        createAccountListItemParagraphs(account);
+      const accountListItem = createListItem("account-item");
+      const accountListItemChild = createAccountListItemChild(account);
+
+      accountListItemChild.emailDiv.append(
+        accountListItemChild.emailHeading,
+        accountListItemChild.emailParagraph
+      );
+
+      accountListItemChild.usernameDiv.append(
+        accountListItemChild.usernameHeading,
+        accountListItemChild.usernameParagraph
+      );
+
+      accountListItemChild.passwordDiv.append(
+        accountListItemChild.passwordHeading,
+        accountListItemChild.passwordParagraph
+      );
 
       accountListItem.append(
-        accountListItemParagraphs.labelParagraph,
-        accountListItemParagraphs.emailParagraph,
-        accountListItemParagraphs.usernameParagraph,
-        accountListItemParagraphs.passwordParagraph
+        accountListItemChild.labelHeading,
+        accountListItemChild.emailDiv,
+        accountListItemChild.usernameDiv,
+        accountListItemChild.passwordDiv
       );
 
       accountsList.append(accountListItem);
@@ -106,16 +152,31 @@ function renderAllAccounts(): void {
 }
 
 function renderNewAccount(): void {
-  const accountListItem = createListItem("account");
-  const accountListItemParagraphs = createAccountListItemParagraphs(
+  const accountListItem = createListItem("account-item");
+  const accountListItemChild = createAccountListItemChild(
     accounts[accounts.length - 1]
   );
 
+  accountListItemChild.emailDiv.append(
+    accountListItemChild.emailHeading,
+    accountListItemChild.emailParagraph
+  );
+
+  accountListItemChild.usernameDiv.append(
+    accountListItemChild.usernameHeading,
+    accountListItemChild.usernameParagraph
+  );
+
+  accountListItemChild.passwordDiv.append(
+    accountListItemChild.passwordHeading,
+    accountListItemChild.passwordParagraph
+  );
+
   accountListItem.append(
-    accountListItemParagraphs.labelParagraph,
-    accountListItemParagraphs.emailParagraph,
-    accountListItemParagraphs.usernameParagraph,
-    accountListItemParagraphs.passwordParagraph
+    accountListItemChild.labelHeading,
+    accountListItemChild.emailDiv,
+    accountListItemChild.usernameDiv,
+    accountListItemChild.passwordDiv
   );
 
   accountsList.append(accountListItem);
