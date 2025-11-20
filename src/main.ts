@@ -28,7 +28,8 @@ type AccountListItemChild = {
   passwordParagraph: HTMLParagraphElement;
 };
 
-const accounts: Accounts = [];
+let accounts: Accounts = [];
+
 const searchInput = document.querySelector(".search") as HTMLInputElement;
 const form = document.querySelector(".form") as HTMLFormElement;
 const labelInput = document.querySelector(".label") as HTMLInputElement;
@@ -64,8 +65,7 @@ function addAccount(accounts: Accounts): Accounts {
     password: passwordInput.value,
   };
 
-  accounts.push(account);
-  return accounts;
+  return [...accounts, account];
 }
 
 function createListItem(className: string): HTMLLIElement {
@@ -169,7 +169,7 @@ function renderAllAccounts(): void {
 }
 */
 
-function renderNewAccount(): void {
+function renderNewAccount(accounts: Accounts): void {
   const accountListItem = createListItem("account-item");
   const accountListItemChild = createAccountListItemChild(
     accounts[accounts.length - 1]
@@ -209,7 +209,7 @@ searchInput.addEventListener("input", searchAccounts);
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (accounts.length < 1) accountsList.innerHTML = "";
-  addAccount(accounts);
-  renderNewAccount();
+  accounts = addAccount(accounts);
+  renderNewAccount(accounts);
   form.reset();
 });
