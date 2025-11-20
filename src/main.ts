@@ -127,6 +127,8 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   };
 }
 
+/*
+  ** Temporarily disabled until adding persistent storage **
 function renderAllAccounts(): void {
   accountsList.innerHTML = "";
 
@@ -165,6 +167,7 @@ function renderAllAccounts(): void {
     accountsList.append(emptyAccountListItem);
   }
 }
+*/
 
 function renderNewAccount(): void {
   const accountListItem = createListItem("account-item");
@@ -197,7 +200,11 @@ function renderNewAccount(): void {
   accountsList.append(accountListItem);
 }
 
+/* 
+  ** Temporarily disable until adding persistent storage **
 document.addEventListener("DOMContentLoaded", renderAllAccounts);
+*/
+
 searchInput.addEventListener("input", searchAccounts);
 form.addEventListener("submit", (e) => {
   e.preventDefault();
