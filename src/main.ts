@@ -2,16 +2,16 @@
   To Do:
     - Add delete account.
     - Add edit account.
-    - Add empty text placeholder.
+    - [Done] Add empty text placeholder.
     - Add copy to clipboard.
     - [Done] Add validation.
-    - Don't render empty elements.
+    - [Done] Don't render empty elements OR add default text if there are no inputs.
 */
 
 type Account = {
   label: string;
-  email: string;
-  username: string;
+  email?: string;
+  username?: string;
   password: string;
 };
 type Accounts = Account[];
@@ -106,9 +106,12 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   usernameHeading.textContent = "Username";
   passwordHeading.textContent = "Password";
 
-  emailParagraph.textContent = account.email;
-  usernameParagraph.textContent = account.username;
+  emailParagraph.textContent = account.email || "Not required";
+  usernameParagraph.textContent = account.username || "Not required";
   passwordParagraph.textContent = account.password;
+
+  emailParagraph.style.fontStyle = account.email ? "normal" : "italic";
+  usernameParagraph.style.fontStyle = account.username ? "normal" : "italic";
 
   return {
     emailDiv,
