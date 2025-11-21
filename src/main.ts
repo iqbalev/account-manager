@@ -3,7 +3,7 @@
     - Add delete account.
     - Add edit account.
     - [Done] Add empty text placeholder.
-    - Add copy to clipboard.
+    - [Done] Add copy to clipboard.
     - [Done] Add validation.
     - [Done] Don't render empty elements OR add default text if there are no inputs.
 */
@@ -26,6 +26,9 @@ type AccountListItemChild = {
   emailParagraph: HTMLParagraphElement;
   usernameParagraph: HTMLParagraphElement;
   passwordParagraph: HTMLParagraphElement;
+  copyEmailButton: HTMLButtonElement;
+  copyUsernameButton: HTMLButtonElement;
+  copyPasswordButton: HTMLButtonElement;
 };
 
 let accounts: Accounts = [];
@@ -88,6 +91,10 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   const usernameParagraph = document.createElement("p");
   const passwordParagraph = document.createElement("p");
 
+  const copyEmailButton = document.createElement("button");
+  const copyUsernameButton = document.createElement("button");
+  const copyPasswordButton = document.createElement("button");
+
   emailDiv.classList.add("email-wrapper");
   usernameDiv.classList.add("username-wrapper");
   passwordDiv.classList.add("password-wrapper");
@@ -101,6 +108,10 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   usernameParagraph.classList.add("username");
   passwordParagraph.classList.add("password");
 
+  copyEmailButton.classList.add("copy-email-button");
+  copyUsernameButton.classList.add("copy-username-button");
+  copyPasswordButton.classList.add("copy-password-button");
+
   labelHeading.textContent = account.label;
   emailHeading.textContent = "Email";
   usernameHeading.textContent = "Username";
@@ -109,6 +120,10 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   emailParagraph.textContent = account.email || "Not required";
   usernameParagraph.textContent = account.username || "Not required";
   passwordParagraph.textContent = account.password;
+
+  copyEmailButton.textContent = "Copy";
+  copyUsernameButton.textContent = "Copy";
+  copyPasswordButton.textContent = "Copy";
 
   emailParagraph.style.fontStyle = account.email ? "normal" : "italic";
   usernameParagraph.style.fontStyle = account.username ? "normal" : "italic";
@@ -124,49 +139,52 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
     emailParagraph,
     usernameParagraph,
     passwordParagraph,
+    copyEmailButton,
+    copyUsernameButton,
+    copyPasswordButton,
   };
 }
 
 /*
   ** Temporarily disabled until adding persistent storage **
-function renderAllAccounts(): void {
-  accountsList.innerHTML = "";
+  function renderAllAccounts(): void {
+    accountsList.innerHTML = "";
 
-  if (accounts.length > 0) {
-    accounts.forEach((account) => {
-      const accountListItem = createListItem("account-item");
-      const accountListItemChild = createAccountListItemChild(account);
+    if (accounts.length > 0) {
+      accounts.forEach((account) => {
+        const accountListItem = createListItem("account-item");
+        const accountListItemChild = createAccountListItemChild(account);
 
-      accountListItemChild.emailDiv.append(
-        accountListItemChild.emailHeading,
-        accountListItemChild.emailParagraph
-      );
+        accountListItemChild.emailDiv.append(
+          accountListItemChild.emailHeading,
+          accountListItemChild.emailParagraph
+        );
 
-      accountListItemChild.usernameDiv.append(
-        accountListItemChild.usernameHeading,
-        accountListItemChild.usernameParagraph
-      );
+        accountListItemChild.usernameDiv.append(
+          accountListItemChild.usernameHeading,
+          accountListItemChild.usernameParagraph
+        );
 
-      accountListItemChild.passwordDiv.append(
-        accountListItemChild.passwordHeading,
-        accountListItemChild.passwordParagraph
-      );
+        accountListItemChild.passwordDiv.append(
+          accountListItemChild.passwordHeading,
+          accountListItemChild.passwordParagraph
+        );
 
-      accountListItem.append(
-        accountListItemChild.labelHeading,
-        accountListItemChild.emailDiv,
-        accountListItemChild.usernameDiv,
-        accountListItemChild.passwordDiv
-      );
+        accountListItem.append(
+          accountListItemChild.labelHeading,
+          accountListItemChild.emailDiv,
+          accountListItemChild.usernameDiv,
+          accountListItemChild.passwordDiv
+        );
 
-      accountsList.append(accountListItem);
-    });
-  } else {
-    const emptyAccountListItem = createListItem("empty-account-item");
-    emptyAccountListItem.textContent = "Still empty here...";
-    accountsList.append(emptyAccountListItem);
+        accountsList.append(accountListItem);
+      });
+    } else {
+      const emptyAccountListItem = createListItem("empty-account-item");
+      emptyAccountListItem.textContent = "Still empty here...";
+      accountsList.append(emptyAccountListItem);
+    }
   }
-}
 */
 
 function renderNewAccount(accounts: Accounts): void {
@@ -180,15 +198,31 @@ function renderNewAccount(accounts: Accounts): void {
     accountListItemChild.emailParagraph
   );
 
+  if (accountListItemChild.emailParagraph.textContent !== "Not required") {
+    accountListItemChild.emailDiv.append(accountListItemChild.copyEmailButton);
+  }
+
   accountListItemChild.usernameDiv.append(
     accountListItemChild.usernameHeading,
     accountListItemChild.usernameParagraph
   );
 
+  if (accountListItemChild.usernameParagraph.textContent !== "Not required") {
+    accountListItemChild.usernameDiv.append(
+      accountListItemChild.copyUsernameButton
+    );
+  }
+
   accountListItemChild.passwordDiv.append(
     accountListItemChild.passwordHeading,
     accountListItemChild.passwordParagraph
   );
+
+  if (accountListItemChild.passwordParagraph.textContent !== "Not required") {
+    accountListItemChild.passwordDiv.append(
+      accountListItemChild.copyPasswordButton
+    );
+  }
 
   accountListItem.append(
     accountListItemChild.labelHeading,
@@ -202,7 +236,7 @@ function renderNewAccount(accounts: Accounts): void {
 
 /* 
   ** Temporarily disable until adding persistent storage **
-document.addEventListener("DOMContentLoaded", renderAllAccounts);
+  document.addEventListener("DOMContentLoaded", renderAllAccounts);
 */
 
 searchInput.addEventListener("input", searchAccounts);
@@ -212,4 +246,25 @@ form.addEventListener("submit", (e) => {
   accounts = addAccount(accounts);
   renderNewAccount(accounts);
   form.reset();
+});
+accountsList.addEventListener("click", (e) => {
+  if (!(e.target instanceof Element)) return;
+
+  const target = e.target;
+  const isCopyButton =
+    target.classList.contains("copy-email-button") ||
+    target.classList.contains("copy-username-button") ||
+    target.classList.contains("copy-password-button");
+
+  if (isCopyButton) {
+    const parent = target.parentElement;
+    if (!parent) return;
+
+    const paragraph = parent.querySelector("p");
+    if (!paragraph) return;
+
+    if ("clipboard" in navigator) {
+      navigator.clipboard.writeText(paragraph.textContent);
+    }
+  }
 });
