@@ -1,6 +1,6 @@
 /*
   To Do:
-    - Add delete account.
+    - [Done] Add delete account.
     - Add edit account.
     - [Done] Add empty text placeholder.
     - [Done] Add copy to clipboard.
@@ -9,6 +9,7 @@
 */
 
 type Account = {
+  id: string;
   label: string;
   email?: string;
   username?: string;
@@ -26,6 +27,7 @@ type AccountListItemChild = {
   emailParagraph: HTMLParagraphElement;
   usernameParagraph: HTMLParagraphElement;
   passwordParagraph: HTMLParagraphElement;
+  deleteButton: HTMLButtonElement;
   copyEmailButton: HTMLButtonElement;
   copyUsernameButton: HTMLButtonElement;
   copyPasswordButton: HTMLButtonElement;
@@ -62,6 +64,7 @@ function searchAccounts(): void {
 
 function addAccount(accounts: Accounts): Accounts {
   const account: Account = {
+    id: Math.floor(Math.random() + Date.now()).toString(),
     label: labelInput.value,
     email: emailInput.value,
     username: usernameInput.value,
@@ -71,8 +74,9 @@ function addAccount(accounts: Accounts): Accounts {
   return [...accounts, account];
 }
 
-function createListItem(className: string): HTMLLIElement {
+function createListItem(className: string, dataId: string): HTMLLIElement {
   const listItem = document.createElement("li");
+  listItem.dataset.id = dataId;
   listItem.classList.add(className);
   return listItem;
 }
@@ -91,6 +95,7 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   const usernameParagraph = document.createElement("p");
   const passwordParagraph = document.createElement("p");
 
+  const deleteButton = document.createElement("button");
   const copyEmailButton = document.createElement("button");
   const copyUsernameButton = document.createElement("button");
   const copyPasswordButton = document.createElement("button");
@@ -108,9 +113,10 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   usernameParagraph.classList.add("username");
   passwordParagraph.classList.add("password");
 
-  copyEmailButton.classList.add("copy-email-button");
-  copyUsernameButton.classList.add("copy-username-button");
-  copyPasswordButton.classList.add("copy-password-button");
+  deleteButton.classList.add("button", "delete");
+  copyEmailButton.classList.add("button", "copy");
+  copyUsernameButton.classList.add("button", "copy");
+  copyPasswordButton.classList.add("button", "copy");
 
   labelHeading.textContent = account.label;
   emailHeading.textContent = "Email";
@@ -121,6 +127,7 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   usernameParagraph.textContent = account.username || "Not required";
   passwordParagraph.textContent = account.password;
 
+  deleteButton.textContent = "Delete";
   copyEmailButton.textContent = "Copy";
   copyUsernameButton.textContent = "Copy";
   copyPasswordButton.textContent = "Copy";
@@ -139,6 +146,7 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
     emailParagraph,
     usernameParagraph,
     passwordParagraph,
+    deleteButton,
     copyEmailButton,
     copyUsernameButton,
     copyPasswordButton,
@@ -187,11 +195,9 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   }
 */
 
-function renderNewAccount(accounts: Accounts): void {
-  const accountListItem = createListItem("account-item");
-  const accountListItemChild = createAccountListItemChild(
-    accounts[accounts.length - 1]
-  );
+function renderNewAccount(account: Account): void {
+  const accountListItem = createListItem("account-item", account.id);
+  const accountListItemChild = createAccountListItemChild(account);
 
   accountListItemChild.emailDiv.append(
     accountListItemChild.emailHeading,
@@ -226,6 +232,7 @@ function renderNewAccount(accounts: Accounts): void {
 
   accountListItem.append(
     accountListItemChild.labelHeading,
+    accountListItemChild.deleteButton,
     accountListItemChild.emailDiv,
     accountListItemChild.usernameDiv,
     accountListItemChild.passwordDiv
@@ -240,30 +247,32 @@ function renderNewAccount(accounts: Accounts): void {
 */
 
 searchInput.addEventListener("input", searchAccounts);
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (accounts.length < 1) accountsList.innerHTML = "";
   accounts = addAccount(accounts);
-  renderNewAccount(accounts);
+  const newAccount = accounts[accounts.length - 1];
+  renderNewAccount(newAccount);
   form.reset();
 });
+
 accountsList.addEventListener("click", (e) => {
   if (!(e.target instanceof Element)) return;
-
   const target = e.target;
-  const isCopyButton =
-    target.classList.contains("copy-email-button") ||
-    target.classList.contains("copy-username-button") ||
-    target.classList.contains("copy-password-button");
-
-  if (isCopyButton) {
-    const parent = target.parentElement;
-    if (!parent) return;
-
+  const parent = target.parentElement;
+  const isDeleteButton = target.matches(".delete");
+  const isCopyButton = target.matches(".copy");
+  if (isDeleteButton && parent) {
+    const accountsAfterDeletion = accounts.filter(
+      (account) => account.id !== parent.dataset.id
+    );
+    accounts = accountsAfterDeletion;
+    parent.remove();
+  }
+  if (isCopyButton && parent) {
     const paragraph = parent.querySelector("p");
-    if (!paragraph) return;
-
-    if ("clipboard" in navigator) {
+    if ("clipboard" in navigator && paragraph) {
       navigator.clipboard.writeText(paragraph.textContent);
     }
   }
