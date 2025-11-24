@@ -6,6 +6,8 @@
     - [Done] Add copy to clipboard.
     - [Done] Add validation.
     - [Done] Don't render empty elements OR add default text if there are no inputs.
+    - Integrate IndexedDB for persistent storage.
+    - Add PWA support.
 */
 
 type Account = {
@@ -45,6 +47,23 @@ const accountsList = document.querySelector(
   ".accounts-list"
 ) as HTMLUListElement;
 
+function createAccount(): Account {
+  return {
+    id: Math.floor(Math.random() + Date.now()).toString(),
+    label: labelInput.value,
+    email: emailInput.value,
+    username: usernameInput.value,
+    password: passwordInput.value,
+  };
+}
+
+function deleteAccount(
+  accounts: Accounts,
+  deleteTarget: HTMLElement
+): Accounts {
+  return accounts.filter((account) => account.id !== deleteTarget.dataset.id);
+}
+
 function searchAccounts(): void {
   const searchQuery = searchInput.value.toLowerCase();
   const accountListItemLabelHeadings = accountsList.getElementsByTagName("h2");
@@ -62,16 +81,14 @@ function searchAccounts(): void {
   }
 }
 
-function addAccount(accounts: Accounts): Accounts {
-  const account: Account = {
-    id: Math.floor(Math.random() + Date.now()).toString(),
-    label: labelInput.value,
-    email: emailInput.value,
-    username: usernameInput.value,
-    password: passwordInput.value,
-  };
-
-  return [...accounts, account];
+function copyToClipboard(copyTarget: HTMLElement) {
+  const paragraph = copyTarget.querySelector("p");
+  if ("clipboard" in navigator && paragraph) {
+    navigator.clipboard
+      .writeText(paragraph.textContent)
+      .then()
+      .catch((error) => console.log(error));
+  }
 }
 
 function createListItem(className: string, dataId: string): HTMLLIElement {
@@ -250,30 +267,26 @@ searchInput.addEventListener("input", searchAccounts);
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+
   if (accounts.length < 1) accountsList.innerHTML = "";
-  accounts = addAccount(accounts);
-  const newAccount = accounts[accounts.length - 1];
-  renderNewAccount(newAccount);
+  accounts = [...accounts, createAccount()];
+  renderNewAccount(accounts[accounts.length - 1]);
+
   form.reset();
 });
 
 accountsList.addEventListener("click", (e) => {
   if (!(e.target instanceof Element)) return;
-  const target = e.target;
-  const parent = target.parentElement;
-  const isDeleteButton = target.matches(".delete");
-  const isCopyButton = target.matches(".copy");
-  if (isDeleteButton && parent) {
-    const accountsAfterDeletion = accounts.filter(
-      (account) => account.id !== parent.dataset.id
-    );
-    accounts = accountsAfterDeletion;
+
+  const parent = e.target.parentElement;
+  if (!parent) return;
+
+  if (e.target.matches(".delete")) {
+    accounts = deleteAccount(accounts, parent);
     parent.remove();
   }
-  if (isCopyButton && parent) {
-    const paragraph = parent.querySelector("p");
-    if ("clipboard" in navigator && paragraph) {
-      navigator.clipboard.writeText(paragraph.textContent);
-    }
+
+  if (e.target.matches(".copy")) {
+    copyToClipboard(parent);
   }
 });
