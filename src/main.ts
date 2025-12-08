@@ -12,7 +12,7 @@
 
 type Account = {
   id: string;
-  label: string;
+  accountName: string;
   email?: string;
   username?: string;
   password: string;
@@ -22,7 +22,7 @@ type AccountListItemChild = {
   emailDiv: HTMLDivElement;
   usernameDiv: HTMLDivElement;
   passwordDiv: HTMLDivElement;
-  labelHeading: HTMLHeadingElement;
+  accountNameHeading: HTMLHeadingElement;
   emailHeading: HTMLHeadingElement;
   usernameHeading: HTMLHeadingElement;
   passwordHeading: HTMLHeadingElement;
@@ -38,11 +38,22 @@ type AccountListItemChild = {
 let accounts: Accounts = [];
 
 const searchInput = document.querySelector(".search") as HTMLInputElement;
+const addButton = document.querySelector(".button.add") as HTMLButtonElement;
+const closeButton = document.querySelector(
+  ".button.close"
+) as HTMLButtonElement;
+const modal = document.querySelector(".modal") as HTMLDialogElement;
 const form = document.querySelector(".form") as HTMLFormElement;
-const labelInput = document.querySelector(".label") as HTMLInputElement;
-const emailInput = document.querySelector(".email") as HTMLInputElement;
-const usernameInput = document.querySelector(".username") as HTMLInputElement;
-const passwordInput = document.querySelector(".password") as HTMLInputElement;
+const accountNameInput = document.querySelector(
+  ".account-name-input"
+) as HTMLInputElement;
+const emailInput = document.querySelector(".email-input") as HTMLInputElement;
+const usernameInput = document.querySelector(
+  ".username-input"
+) as HTMLInputElement;
+const passwordInput = document.querySelector(
+  ".password-input"
+) as HTMLInputElement;
 const accountsList = document.querySelector(
   ".accounts-list"
 ) as HTMLUListElement;
@@ -50,42 +61,48 @@ const accountsList = document.querySelector(
 function createAccount(): Account {
   return {
     id: Math.floor(Math.random() + Date.now()).toString(),
-    label: labelInput.value,
+    accountName: accountNameInput.value,
     email: emailInput.value,
     username: usernameInput.value,
     password: passwordInput.value,
   };
 }
 
-function deleteAccount(
-  accounts: Accounts,
-  deleteTarget: HTMLElement
-): Accounts {
-  return accounts.filter((account) => account.id !== deleteTarget.dataset.id);
+function deleteAccount(accounts: Accounts, target: HTMLElement): Accounts {
+  return accounts.filter((account) => account.id !== target.dataset.id);
 }
 
 function searchAccounts(): void {
   const searchQuery = searchInput.value.toLowerCase();
-  const accountListItemLabelHeadings = accountsList.getElementsByTagName("h2");
+  const accountNameHeadings = accountsList.getElementsByTagName("h2");
 
-  for (const accountListItemLabelHeading of accountListItemLabelHeadings) {
-    const isResultsFound = accountListItemLabelHeading.textContent
+  for (const accountNameHeading of accountNameHeadings) {
+    const isResultsFound = accountNameHeading.textContent
       .toLowerCase()
       .includes(searchQuery);
 
-    if (accountListItemLabelHeading.parentElement) {
-      accountListItemLabelHeading.parentElement.style.display = isResultsFound
-        ? ""
-        : "none";
+    const parent = accountNameHeading.parentElement;
+    if (parent) {
+      parent.style.display = isResultsFound ? "" : "none";
     }
   }
 }
 
-function copyToClipboard(copyTarget: HTMLElement) {
-  const paragraph = copyTarget.querySelector("p");
-  if ("clipboard" in navigator && paragraph) {
+function copyToClipboard(target: HTMLElement): void {
+  if ("clipboard" in navigator && target) {
+    /* 
+    I have to use .childNodes instead of .textContent directly because the "Copy" button is the child of the element I want to target. 
+    If not, the target text will also include the child (the "Copy" button) text value.
+    */
+    let targetText = "";
+    target.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        targetText += node.nodeValue;
+      }
+    });
+
     navigator.clipboard
-      .writeText(paragraph.textContent)
+      .writeText(targetText)
       .then()
       .catch((error) => console.log(error));
   }
@@ -103,7 +120,7 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   const usernameDiv = document.createElement("div");
   const passwordDiv = document.createElement("div");
 
-  const labelHeading = document.createElement("h2");
+  const accountNameHeading = document.createElement("h2");
   const emailHeading = document.createElement("h3");
   const usernameHeading = document.createElement("h3");
   const passwordHeading = document.createElement("h3");
@@ -121,7 +138,7 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   usernameDiv.classList.add("username-wrapper");
   passwordDiv.classList.add("password-wrapper");
 
-  labelHeading.classList.add("label-heading");
+  accountNameHeading.classList.add("account-name-heading");
   emailHeading.classList.add("email-heading");
   usernameHeading.classList.add("username-heading");
   passwordHeading.classList.add("password-heading");
@@ -135,13 +152,13 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   copyUsernameButton.classList.add("button", "copy");
   copyPasswordButton.classList.add("button", "copy");
 
-  labelHeading.textContent = account.label;
+  accountNameHeading.textContent = account.accountName;
   emailHeading.textContent = "Email";
   usernameHeading.textContent = "Username";
   passwordHeading.textContent = "Password";
 
-  emailParagraph.textContent = account.email || "Not required";
-  usernameParagraph.textContent = account.username || "Not required";
+  emailParagraph.textContent = account.email || "";
+  usernameParagraph.textContent = account.username || "";
   passwordParagraph.textContent = account.password;
 
   deleteButton.textContent = "Delete";
@@ -149,14 +166,11 @@ function createAccountListItemChild(account: Account): AccountListItemChild {
   copyUsernameButton.textContent = "Copy";
   copyPasswordButton.textContent = "Copy";
 
-  emailParagraph.style.fontStyle = account.email ? "normal" : "italic";
-  usernameParagraph.style.fontStyle = account.username ? "normal" : "italic";
-
   return {
     emailDiv,
     usernameDiv,
     passwordDiv,
-    labelHeading,
+    accountNameHeading,
     emailHeading,
     usernameHeading,
     passwordHeading,
@@ -216,45 +230,48 @@ function renderNewAccount(account: Account): void {
   const accountListItem = createListItem("account-item", account.id);
   const accountListItemChild = createAccountListItemChild(account);
 
-  accountListItemChild.emailDiv.append(
-    accountListItemChild.emailHeading,
-    accountListItemChild.emailParagraph
-  );
+  accountListItem.append(accountListItemChild.accountNameHeading);
 
-  if (accountListItemChild.emailParagraph.textContent !== "Not required") {
-    accountListItemChild.emailDiv.append(accountListItemChild.copyEmailButton);
+  if (accountListItemChild.emailParagraph.textContent !== "") {
+    accountListItemChild.emailParagraph.append(
+      accountListItemChild.copyEmailButton
+    );
+
+    accountListItemChild.emailDiv.append(
+      accountListItemChild.emailHeading,
+      accountListItemChild.emailParagraph
+    );
+
+    accountListItem.append(accountListItemChild.emailDiv);
   }
 
-  accountListItemChild.usernameDiv.append(
-    accountListItemChild.usernameHeading,
-    accountListItemChild.usernameParagraph
-  );
-
-  if (accountListItemChild.usernameParagraph.textContent !== "Not required") {
-    accountListItemChild.usernameDiv.append(
+  if (accountListItemChild.usernameParagraph.textContent !== "") {
+    accountListItemChild.usernameParagraph.append(
       accountListItemChild.copyUsernameButton
     );
+
+    accountListItemChild.usernameDiv.append(
+      accountListItemChild.usernameHeading,
+      accountListItemChild.usernameParagraph
+    );
+
+    accountListItem.append(accountListItemChild.usernameDiv);
   }
 
-  accountListItemChild.passwordDiv.append(
-    accountListItemChild.passwordHeading,
-    accountListItemChild.passwordParagraph
-  );
-
-  if (accountListItemChild.passwordParagraph.textContent !== "Not required") {
-    accountListItemChild.passwordDiv.append(
+  if (accountListItemChild.passwordParagraph.textContent !== "") {
+    accountListItemChild.passwordParagraph.append(
       accountListItemChild.copyPasswordButton
     );
+
+    accountListItemChild.passwordDiv.append(
+      accountListItemChild.passwordHeading,
+      accountListItemChild.passwordParagraph
+    );
+
+    accountListItem.append(accountListItemChild.passwordDiv);
   }
 
-  accountListItem.append(
-    accountListItemChild.labelHeading,
-    accountListItemChild.deleteButton,
-    accountListItemChild.emailDiv,
-    accountListItemChild.usernameDiv,
-    accountListItemChild.passwordDiv
-  );
-
+  accountListItem.append(accountListItemChild.deleteButton);
   accountsList.append(accountListItem);
 }
 
@@ -265,6 +282,13 @@ function renderNewAccount(account: Account): void {
 
 searchInput.addEventListener("input", searchAccounts);
 
+addButton.addEventListener("click", () => {
+  modal.showModal();
+  accountNameInput.focus();
+});
+
+closeButton.addEventListener("click", () => modal.close());
+
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -272,6 +296,7 @@ form.addEventListener("submit", (e) => {
   accounts = [...accounts, createAccount()];
   renderNewAccount(accounts[accounts.length - 1]);
 
+  modal.close();
   form.reset();
 });
 

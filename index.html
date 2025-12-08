@@ -8,50 +8,65 @@
     <title>Account Manager</title>
   </head>
   <body>
-    <div id="app">
-      <h1 class="main-heading">Account Manager</h1>
-      <button type="button">Add New</button>
-      <input
-        type="search"
-        name="search"
-        id="search"
-        placeholder="Search account: e.g. google, steam"
-        class="search"
-      />
-      <form class="form">
+    <div id="app" class="app">
+      <header class="header">
+        <h1 class="main-heading">Account Manager</h1>
         <input
-          type="text"
-          name="label"
-          id="label"
-          placeholder="Label"
-          required
-          class="Enter label"
+          type="search"
+          name="search"
+          id="search"
+          placeholder="Search account: e.g. google, steam"
+          class="search"
         />
-        <input
-          type="text"
-          name="email"
-          id="email"
-          placeholder="Email (if required)"
-          class="Enter email"
-        />
-        <input
-          type="text"
-          name="username"
-          id="username"
-          placeholder="Username (if required)"
-          class="Enter username"
-        />
-        <input
-          type="text"
-          name="password"
-          id="password"
-          placeholder="Password"
-          required
-          class="Enter password"
-        />
-        <button type="submit" class="save-button">Save</button>
-      </form>
-      <ul class="accounts-list"></ul>
+      </header>
+
+      <main class="main-content">
+        <ul class="accounts-list"></ul>
+        <button type="button" class="button add">Add</button>
+        <dialog class="modal">
+          <button type="button" class="button close">Close</button>
+          <h2>Account Details</h2>
+          <form class="form">
+            <label for="account-name">Account Name</label>
+            <input
+              type="text"
+              name="account-name"
+              id="account-name"
+              placeholder="Steam"
+              required
+              class="account-name-input"
+            />
+            <label for="email">Email (optional)</label>
+            <input
+              type="text"
+              name="email"
+              id="email"
+              placeholder="youremail@mail.com"
+              class="email-input"
+            />
+            <label for="username">Username (optional)</label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              placeholder="yourusername"
+              class="username-input"
+            />
+            <label for="password">Password</label>
+            <input
+              type="text"
+              name="password"
+              id="password"
+              placeholder="Enter your password"
+              required
+              class="password-input"
+            />
+            <button type="submit" class="button save-close">
+              Save & Close
+            </button>
+          </form>
+        </dialog>
+      </main>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
