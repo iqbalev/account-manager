@@ -287,7 +287,10 @@ addButton.addEventListener("click", () => {
   accountNameInput.focus();
 });
 
-closeButton.addEventListener("click", () => modal.close());
+closeButton.addEventListener("click", () => {
+  modal.close();
+  form.reset();
+});
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
